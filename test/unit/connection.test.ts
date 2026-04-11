@@ -132,7 +132,6 @@ describe('Connection', () => {
 
   it('reconnects after a mid-flight socket drop', async () => {
     vi.useFakeTimers();
-    let writeCount = 0;
     let connectCount = 0;
 
     class FakeApi {
@@ -141,7 +140,6 @@ describe('Connection', () => {
         connectCount += 1;
       }
       async write(path: string) {
-        writeCount += 1;
         if (path === '/drop') {
           throw new Error('socket closed');
         }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { getIntegrationConfig } from './env.js';
 import { MikrotikClient } from '../../src/index.js';
 

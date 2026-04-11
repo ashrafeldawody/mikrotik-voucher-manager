@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { MikrotikClient } from '../../src/client.js';
-import { MikrotikValidationError, MikrotikAuthError } from '../../src/errors.js';
+import { MikrotikValidationError } from '../../src/errors.js';
 import type { RawResponse } from '../../src/types.js';
 
 /**
