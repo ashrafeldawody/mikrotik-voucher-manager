@@ -41,6 +41,14 @@
   ],
   "author": "Ashraf Eldawody",
   "license": "MIT",
+  "homepage": "https://github.com/ashrafeldawody/mikrotik-voucher-manager#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashrafeldawody/mikrotik-voucher-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ashrafeldawody/mikrotik-voucher-manager/issues"
+  },
   "dependencies": {
     "routeros": "^1.6.8"
   },
