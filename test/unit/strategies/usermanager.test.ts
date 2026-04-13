@@ -55,8 +55,8 @@ describe('UserManagerStrategy', () => {
       expect(limAdd!.params).toContain('=owner=admin');
       expect(limAdd!.params).toContain('=uptime-limit=1h');
       expect(limAdd!.params).toContain('=transfer-limit=1073741824');
-      expect(limAdd!.params).toContain('=rate-limit-rx=512k');
-      expect(limAdd!.params).toContain('=rate-limit-tx=4M');
+      expect(limAdd!.params).toContain('=rate-limit-rx=524288');
+      expect(limAdd!.params).toContain('=rate-limit-tx=4194304');
 
       const profAdd = fake.lastCallTo('/tool/user-manager/profile/add');
       expect(profAdd!.params).toContain('=name=vip');
@@ -132,8 +132,8 @@ describe('UserManagerStrategy', () => {
       expect(limSet).toBeDefined();
       expect(limSet!.params).toContain('=.id=*lim1');
       expect(limSet!.params).toContain('=uptime-limit=2h');
-      expect(limSet!.params).toContain('=rate-limit-rx=1M');
-      expect(limSet!.params).toContain('=rate-limit-tx=8M');
+      expect(limSet!.params).toContain('=rate-limit-rx=1048576');
+      expect(limSet!.params).toContain('=rate-limit-tx=8388608');
       // Check transfer-limit contains the formatted bytes
       expect(limSet!.params.some(p => p.startsWith('=transfer-limit='))).toBe(true);
 
@@ -163,8 +163,8 @@ describe('UserManagerStrategy', () => {
 
       const limSet = fake.lastCallTo('/tool/user-manager/profile/limitation/set');
       expect(limSet).toBeDefined();
-      expect(limSet!.params).toContain('=rate-limit-rx=2M');
-      expect(limSet!.params).toContain('=rate-limit-tx=4M');
+      expect(limSet!.params).toContain('=rate-limit-rx=2097152');
+      expect(limSet!.params).toContain('=rate-limit-tx=4194304');
 
       // profile/set should NOT be called (no validity or sharedUsers)
       const profSet = fake.lastCallTo('/tool/user-manager/profile/set');

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseByteSize, formatBytesForMikrotik } from '../../../src/utils/bytes.js';
+import { parseByteSize, formatBytesForMikrotik, normalizeRateLimit } from '../../../src/utils/bytes.js';
 
 describe('parseByteSize', () => {
   it('returns 0 for null/undefined/empty/0', () => {
@@ -55,5 +55,34 @@ describe('formatBytesForMikrotik', () => {
     expect(formatBytesForMikrotik(1024 * 1024)).toBe('1048576');
     expect(formatBytesForMikrotik(1024 * 1024 * 1024)).toBe('1073741824');
     expect(formatBytesForMikrotik(2 * 1024 * 1024 * 1024)).toBe('2147483648');
+  });
+});
+
+describe('normalizeRateLimit', () => {
+  it('converts k suffix to binary bytes', () => {
+    expect(normalizeRateLimit('128k')).toBe('131072');
+    expect(normalizeRateLimit('256k')).toBe('262144');
+    expect(normalizeRateLimit('512k')).toBe('524288');
+  });
+
+  it('converts M suffix to binary bytes', () => {
+    expect(normalizeRateLimit('1M')).toBe('1048576');
+    expect(normalizeRateLimit('2M')).toBe('2097152');
+    expect(normalizeRateLimit('4M')).toBe('4194304');
+    expect(normalizeRateLimit('10M')).toBe('10485760');
+    expect(normalizeRateLimit('100M')).toBe('104857600');
+  });
+
+  it('converts G suffix to binary bytes', () => {
+    expect(normalizeRateLimit('1G')).toBe('1073741824');
+  });
+
+  it('returns raw numbers unchanged', () => {
+    expect(normalizeRateLimit('2097152')).toBe('2097152');
+  });
+
+  it('returns empty/unknown strings unchanged', () => {
+    expect(normalizeRateLimit('')).toBe('');
+    expect(normalizeRateLimit('unlimited')).toBe('unlimited');
   });
 });

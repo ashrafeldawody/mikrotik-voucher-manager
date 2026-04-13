@@ -30,6 +30,7 @@ import {
   normalizeDuration,
   parseByteSize,
   formatBytesForMikrotik,
+  normalizeRateLimit,
   parseMikrotikDate,
   normalizeCallerId,
 } from '../utils/index.js';
@@ -94,8 +95,8 @@ export class UserManagerStrategy implements IWifiBackend {
     }
     if (input.rateLimit && input.rateLimit.includes('/')) {
       const [upload, download] = input.rateLimit.split('/');
-      if (upload) limParams.push(`=rate-limit-rx=${upload}`);
-      if (download) limParams.push(`=rate-limit-tx=${download}`);
+      if (upload) limParams.push(`=rate-limit-rx=${normalizeRateLimit(upload)}`);
+      if (download) limParams.push(`=rate-limit-tx=${normalizeRateLimit(download)}`);
     }
 
     try {
@@ -174,8 +175,8 @@ export class UserManagerStrategy implements IWifiBackend {
       }
       if (patch.rateLimit && patch.rateLimit.includes('/')) {
         const [upload, download] = patch.rateLimit.split('/');
-        if (upload) params.push(`=rate-limit-rx=${upload}`);
-        if (download) params.push(`=rate-limit-tx=${download}`);
+        if (upload) params.push(`=rate-limit-rx=${normalizeRateLimit(upload)}`);
+        if (download) params.push(`=rate-limit-tx=${normalizeRateLimit(download)}`);
       }
       if (params.length > 1) {
         await this.execWithFallback('/tool/user-manager/profile/limitation/set', params, [

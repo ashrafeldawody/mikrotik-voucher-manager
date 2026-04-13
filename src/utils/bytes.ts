@@ -6,6 +6,33 @@ const GB = MB * 1024;
 const TB = GB * 1024;
 
 /**
+ * Normalize a MikroTik rate-limit value (e.g. "2M", "512k", "100M") to raw
+ * bytes using binary (1024-based) multipliers. MikroTik interprets abbreviated
+ * suffixes as decimal (10^3), which causes ugly display like "1M929K128B"
+ * instead of clean "2M". Passing raw binary byte counts avoids this.
+ *
+ * Returns the original string unchanged if it can't be parsed.
+ */
+export function normalizeRateLimit(value: string): string {
+  if (!value) return value;
+  const trimmed = value.trim();
+  const match = trimmed.match(/^(\d+(?:\.\d+)?)\s*([kMG])$/);
+  if (!match) return trimmed;
+
+  const num = parseFloat(match[1]!);
+  const unit = match[2]!;
+
+  let bytes: number;
+  switch (unit) {
+    case 'k': bytes = Math.floor(num * KB); break;
+    case 'M': bytes = Math.floor(num * MB); break;
+    case 'G': bytes = Math.floor(num * GB); break;
+    default: return trimmed;
+  }
+  return String(bytes);
+}
+
+/**
  * Parse a ByteSize (number of bytes or string like '2GB') to bytes.
  */
 export function parseByteSize(value: ByteSize | null | undefined): number {

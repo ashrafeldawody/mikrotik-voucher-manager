@@ -47,6 +47,7 @@ export {
   normalizeDuration,
   parseByteSize,
   formatBytesForMikrotik,
+  normalizeRateLimit,
   parseMikrotikDate,
   normalizeCallerId,
 } from './utils/index.js';
