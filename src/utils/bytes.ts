@@ -41,13 +41,11 @@ export function parseByteSize(value: ByteSize | null | undefined): number {
 }
 
 /**
- * Format a byte count to the compact string MikroTik accepts for transfer-limit.
- * E.g. 2147483648 -> '2G', 1048576 -> '1M', 512 -> '512'
+ * Format a byte count to the string MikroTik accepts for transfer-limit.
+ * Always outputs the raw byte count to avoid decimal vs binary ambiguity —
+ * MikroTik interprets G/M/K as decimal (10^3) multipliers, not binary (2^10).
  */
 export function formatBytesForMikrotik(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0';
-  if (bytes >= GB) return `${Math.floor(bytes / GB)}G`;
-  if (bytes >= MB) return `${Math.floor(bytes / MB)}M`;
-  if (bytes >= KB) return `${Math.floor(bytes / KB)}K`;
   return String(Math.floor(bytes));
 }

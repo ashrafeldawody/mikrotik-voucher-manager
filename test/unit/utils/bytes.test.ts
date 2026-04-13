@@ -50,10 +50,10 @@ describe('formatBytesForMikrotik', () => {
     expect(formatBytesForMikrotik(512)).toBe('512');
   });
 
-  it('formats K/M/G', () => {
-    expect(formatBytesForMikrotik(1024)).toBe('1K');
-    expect(formatBytesForMikrotik(1024 * 1024)).toBe('1M');
-    expect(formatBytesForMikrotik(1024 * 1024 * 1024)).toBe('1G');
-    expect(formatBytesForMikrotik(2 * 1024 * 1024 * 1024)).toBe('2G');
+  it('formats as raw byte count to avoid decimal/binary ambiguity', () => {
+    expect(formatBytesForMikrotik(1024)).toBe('1024');
+    expect(formatBytesForMikrotik(1024 * 1024)).toBe('1048576');
+    expect(formatBytesForMikrotik(1024 * 1024 * 1024)).toBe('1073741824');
+    expect(formatBytesForMikrotik(2 * 1024 * 1024 * 1024)).toBe('2147483648');
   });
 });

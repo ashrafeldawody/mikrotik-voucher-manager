@@ -54,7 +54,7 @@ describe('UserManagerStrategy', () => {
       expect(limAdd!.params).toContain('=name=vip_LIMIT');
       expect(limAdd!.params).toContain('=owner=admin');
       expect(limAdd!.params).toContain('=uptime-limit=1h');
-      expect(limAdd!.params).toContain('=transfer-limit=1G');
+      expect(limAdd!.params).toContain('=transfer-limit=1073741824');
       expect(limAdd!.params).toContain('=rate-limit-rx=512k');
       expect(limAdd!.params).toContain('=rate-limit-tx=4M');
 

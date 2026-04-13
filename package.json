@@ -1,6 +1,6 @@
 {
   "name": "mikrotik-voucher-manager",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Advanced MikroTik WiFi voucher manager supporting Hotspot and User Manager backends through a single unified client.",
   "type": "module",
   "main": "./dist/index.cjs",
