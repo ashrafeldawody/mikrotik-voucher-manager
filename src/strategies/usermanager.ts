@@ -160,8 +160,7 @@ export class UserManagerStrategy implements IWifiBackend {
   }
 
   async updateProfile(name: string, patch: UpdateProfileInput): Promise<Profile> {
-    // User Manager v1 doesn't expose a generic profile/set for limitation fields.
-    // Easiest correct path: mutate the linked limitation.
+    // Step 1: Update the linked limitation (rate limits, uptime, transfer)
     const limitationName = `${name}_LIMIT`;
     const lim = await this.getLimitationByName(limitationName);
     if (lim && lim['.id']) {
@@ -182,6 +181,24 @@ export class UserManagerStrategy implements IWifiBackend {
         await this.execWithFallback('/tool/user-manager/profile/limitation/set', params, [
           '/tool/user-manager/limitation/set',
         ]);
+      }
+    }
+
+    // Step 2: Update the profile itself (validity, shared-users)
+    const rows = await this.connection.exec('/tool/user-manager/profile/print', [
+      `?name=${name}`,
+    ]);
+    const profileRow = rows[0];
+    if (profileRow && profileRow['.id']) {
+      const profParams: string[] = [`=.id=${profileRow['.id']}`];
+      if (patch.validity !== undefined) {
+        profParams.push(`=validity=${normalizeDuration(patch.validity)}`);
+      }
+      if (patch.sharedUsers != null) {
+        profParams.push(`=override-shared-users=${patch.sharedUsers}`);
+      }
+      if (profParams.length > 1) {
+        await this.connection.exec('/tool/user-manager/profile/set', profParams);
       }
     }
 

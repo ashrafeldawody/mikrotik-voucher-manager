@@ -92,6 +92,94 @@ describe('UserManagerStrategy', () => {
     });
   });
 
+  describe('updateProfile', () => {
+    it('updates both limitation and profile fields', async () => {
+      // getLimitationByName lookup
+      fake.respond('/tool/user-manager/profile/limitation/print', [
+        {
+          '.id': '*lim1',
+          name: 'vip_LIMIT',
+          'uptime-limit': '1h',
+          'transfer-limit': '1G',
+          'rate-limit-rx': '512k',
+          'rate-limit-tx': '4M',
+        },
+      ]);
+      // limitation/set
+      fake.respond('/tool/user-manager/profile/limitation/set', []);
+      // profile/print for updating profile validity + shared-users
+      fake.respond('/tool/user-manager/profile/print', [
+        { '.id': '*p1', name: 'vip', owner: 'admin', validity: '1h', 'override-shared-users': '1' },
+      ]);
+      // profile/set
+      fake.respond('/tool/user-manager/profile/set', []);
+      // getProfile for return value
+      fake.respond('/tool/user-manager/profile/profile-limitation/print', [
+        { '.id': '*l1', profile: 'vip', limitation: 'vip_LIMIT' },
+      ]);
+
+      const profile = await strategy.updateProfile('vip', {
+        validity: '2h',
+        dataLimit: '2GB',
+        rateLimit: '1M/8M',
+        sharedUsers: 3,
+      });
+
+      expect(profile.name).toBe('vip');
+
+      // Check limitation was updated
+      const limSet = fake.lastCallTo('/tool/user-manager/profile/limitation/set');
+      expect(limSet).toBeDefined();
+      expect(limSet!.params).toContain('=.id=*lim1');
+      expect(limSet!.params).toContain('=uptime-limit=2h');
+      expect(limSet!.params).toContain('=rate-limit-rx=1M');
+      expect(limSet!.params).toContain('=rate-limit-tx=8M');
+      // Check transfer-limit contains the formatted bytes
+      expect(limSet!.params.some(p => p.startsWith('=transfer-limit='))).toBe(true);
+
+      // Check profile validity and shared-users were updated
+      const profSet = fake.lastCallTo('/tool/user-manager/profile/set');
+      expect(profSet).toBeDefined();
+      expect(profSet!.params).toContain('=.id=*p1');
+      expect(profSet!.params).toContain('=validity=2h');
+      expect(profSet!.params).toContain('=override-shared-users=3');
+    });
+
+    it('updates only limitation when no profile-level fields change', async () => {
+      fake.respond('/tool/user-manager/profile/limitation/print', [
+        { '.id': '*lim1', name: 'vip_LIMIT', 'uptime-limit': '1h' },
+      ]);
+      fake.respond('/tool/user-manager/profile/limitation/set', []);
+      fake.respond('/tool/user-manager/profile/print', [
+        { '.id': '*p1', name: 'vip', owner: 'admin' },
+      ]);
+      fake.respond('/tool/user-manager/profile/profile-limitation/print', [
+        { '.id': '*l1', profile: 'vip', limitation: 'vip_LIMIT' },
+      ]);
+
+      await strategy.updateProfile('vip', {
+        rateLimit: '2M/4M',
+      });
+
+      const limSet = fake.lastCallTo('/tool/user-manager/profile/limitation/set');
+      expect(limSet).toBeDefined();
+      expect(limSet!.params).toContain('=rate-limit-rx=2M');
+      expect(limSet!.params).toContain('=rate-limit-tx=4M');
+
+      // profile/set should NOT be called (no validity or sharedUsers)
+      const profSet = fake.lastCallTo('/tool/user-manager/profile/set');
+      expect(profSet).toBeUndefined();
+    });
+
+    it('throws MikrotikNotFoundError when profile does not exist', async () => {
+      fake.respond('/tool/user-manager/profile/limitation/print', []);
+      fake.respond('/tool/user-manager/profile/print', []);
+
+      await expect(strategy.updateProfile('nope', { validity: '1h' }))
+        .rejects.toBeInstanceOf(MikrotikNotFoundError);
+    });
+  });
+
   describe('createVoucher', () => {
     it('creates user with =username= (UM v1) and activates profile', async () => {
       fake.respond('/tool/user-manager/user/add', []);

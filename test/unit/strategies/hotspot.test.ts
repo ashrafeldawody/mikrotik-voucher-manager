@@ -40,6 +40,45 @@ describe('HotspotStrategy', () => {
     });
   });
 
+  describe('updateProfile', () => {
+    it('updates rate-limit and shared-users via profile/set', async () => {
+      fake.respond('/ip/hotspot/user/profile/print', [
+        { '.id': '*1', name: 'vip', 'rate-limit': '10M/20M', 'shared-users': '3' },
+      ]);
+      fake.respond('/ip/hotspot/user/profile/set', []);
+
+      const profile = await strategy.updateProfile('vip', {
+        rateLimit: '20M/40M',
+        sharedUsers: 5,
+      });
+
+      expect(profile.name).toBe('vip');
+
+      const setCall = fake.lastCallTo('/ip/hotspot/user/profile/set');
+      expect(setCall).toBeDefined();
+      expect(setCall!.params).toContain('=.id=*1');
+      expect(setCall!.params).toContain('=rate-limit=20M/40M');
+      expect(setCall!.params).toContain('=shared-users=5');
+    });
+
+    it('throws MikrotikNotFoundError when profile does not exist', async () => {
+      fake.respond('/ip/hotspot/user/profile/print', []);
+      await expect(strategy.updateProfile('nope', { rateLimit: '1M/1M' }))
+        .rejects.toBeInstanceOf(MikrotikNotFoundError);
+    });
+
+    it('skips set command when patch is empty', async () => {
+      fake.respond('/ip/hotspot/user/profile/print', [
+        { '.id': '*1', name: 'vip', 'rate-limit': '10M/20M', 'shared-users': '3' },
+      ]);
+
+      await strategy.updateProfile('vip', {});
+
+      const setCall = fake.lastCallTo('/ip/hotspot/user/profile/set');
+      expect(setCall).toBeUndefined();
+    });
+  });
+
   describe('createVoucher', () => {
     it('creates a voucher with validity and data limit', async () => {
       fake.respond('/ip/hotspot/user/add', []);
